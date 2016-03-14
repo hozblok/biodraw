@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 """
 Information about the uploaded file in the next format:
@@ -9,6 +10,7 @@ class FileOwl(models.Model):
     path_name = models.CharField(max_length=210)
     sha1 = models.CharField(unique=True, max_length=40)
     pub_date = models.DateTimeField()
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, verbose_name="Owner")
     def __str__(self):
         return self.path_name
 
@@ -27,12 +29,22 @@ Synonyms: part, interactor, object, species
 Examples: extracellular calcium, ser 64 phosphorylated p53
 """
 class PhysicalEntity(models.Model):
+    TYPES_OF_PHYSICALENTITY = (
+        ('Complex', 'Complex'),
+        ('PhysicalEntity', 'PhysicalEntity'),
+        ('Dna', 'Dna'),
+        ('DnaRegion', 'DnaRegion'),
+        ('Protein', 'Protein'),
+        ('Rna', 'Rna'),
+        ('RnaRegion', 'RnaRegion'),
+        ('SmallMolecule', 'SmallMolecule'),
+    )
     file_owl = models.ForeignKey(FileOwl)
     id_name = models.CharField(max_length=200) # PhysicalEntity1, Complex10, Protein7 etc.
-    kind_of = models.CharField(max_length=20) # PhysicalEntity, Complex, Dna, DnaRegion, Protein, Rna, RnaRegion, SmallMolecule
+    kind_of = models.CharField(max_length=20, choices=TYPES_OF_PHYSICALENTITY) # PhysicalEntity, Complex, Dna, DnaRegion, Protein, Rna, RnaRegion, SmallMolecule
     display_name = models.TextField(blank=True)
-    component = models.ManyToManyField('self', null=True, blank=True, symmetrical=False, related_name='self_components')
-    member_physical_entity = models.ManyToManyField('self', null=True, blank=True, symmetrical=False)
+    component = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='self_components')
+    member_physical_entity = models.ManyToManyField('self', blank=True, symmetrical=False)
     comment = models.TextField(null=True, blank=True)
     def __str__(self):
         return("{}: {}".format(self.id_name, self.display_name))
