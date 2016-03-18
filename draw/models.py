@@ -41,8 +41,9 @@ class PhysicalEntity(models.Model):
     )
     file_owl = models.ForeignKey(FileOwl)
     id_name = models.CharField(max_length=200) # PhysicalEntity1, Complex10, Protein7 etc.
+    id_in_file = models.IntegerField(blank=False, null=True)
     kind_of = models.CharField(max_length=20, choices=TYPES_OF_PHYSICALENTITY) # PhysicalEntity, Complex, Dna, DnaRegion, Protein, Rna, RnaRegion, SmallMolecule
-    display_name = models.TextField(blank=True)
+    display_name = models.CharField(max_length=1000, blank=True)
     component = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='self_components')
     member_physical_entity = models.ManyToManyField('self', blank=True, symmetrical=False)
     comment = models.TextField(null=True, blank=True)

@@ -32,7 +32,6 @@ def test1(request):
     #?? не окончено, нужно сделать кнопку и допилить механизм, который будет забирать файлы от клиента
     
     
-    
     # parse owl-xml data and collect to database
     parser = parserOwl(el_file_owl, file_name)
     parser.parse_owl()
@@ -41,7 +40,18 @@ def test1(request):
     
     
     
-    with open("draw/data/miserables.json") as data_file:
+    def name_for_js(kind_of, name): 
+        return (".".join(["flare", kind_of, "cluster", name]))
+    def dict_one_element_for_js(el):
+        return ({"name": name_for_js(el.kind_of, el.id_name),
+        "id_name": el.display_name,
+        "size": 200,
+        "imports":[name_for_js(comp.kind_of, comp.id_name) for comp in el.component.all()]
+        })
+    query_set = PhysicalEntity.objects.filter(file_owl_id=el_file_owl).order_by('id_name')
+    data_for_js = list(map(dict_one_element_for_js, query_set))
+    
+    with open("draw/data/flare-imports.json") as data_file:
         #test_draw = [{"id": 1, "text": 'Hi!',}, {"id": 2, "text": 'This is the test!',}]
         json_string_data = json.dumps(json.loads(data_file.read()))
     #template = loader.get_template('draw/index.html')
@@ -49,10 +59,12 @@ def test1(request):
     #    'test_draw': test_draw,
     #})
     #return HttpResponse(template.render(context))
+    
+    json_string_data = json.dumps(data_for_js)
     context = {
     'json_string_data': json_string_data,
     }
-    return render(request, 'draw/index.html', context)
+    return render(request, 'draw/index_test3_itog.html', context)
     
 def test2(request):
     python_object = {
