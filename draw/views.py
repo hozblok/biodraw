@@ -2,6 +2,8 @@
 #from django.template import RequestContext, loader
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
 import json
 import datetime
 
@@ -10,12 +12,16 @@ from .models import PhysicalEntity
 
 from .src.parserOwl import parserOwl
 
-from .src.basicFunctions import md5
-from .src.basicFunctions import sha1
-from .src.basicFunctions import BUF_SIZE
-from .src.basicFunctions import random_id
+from .src.utils import md5
+from .src.utils import sha1
+from .src.utils import BUFF_SIZE
+from .src.utils import random_id
 
+from .forms import UploadFileForm
 
+#_______________________________________________________________________________#
+#Перенести логику целиком в .src.parserOwl. Вызов происходит теперь в uploadFile|
+#_______________________________________________________________________________#
 def test1(request):
     suffix_file_name = "RAF-Cascade.owl"
     file_name = "draw/data/" + suffix_file_name
@@ -51,9 +57,9 @@ def test1(request):
     query_set = PhysicalEntity.objects.filter(file_owl_id=el_file_owl).order_by('id_name')
     data_for_js = list(map(dict_one_element_for_js, query_set))
     
-    with open("draw/data/flare-imports.json") as data_file:
+    #with open("draw/data/flare-imports.json") as data_file:
         #test_draw = [{"id": 1, "text": 'Hi!',}, {"id": 2, "text": 'This is the test!',}]
-        json_string_data = json.dumps(json.loads(data_file.read()))
+        #json_string_data = json.dumps(json.loads(data_file.read()))
     #template = loader.get_template('draw/index.html')
     #context = RequestContext(request, {
     #    'test_draw': test_draw,
@@ -96,3 +102,19 @@ def test2(request):
     'json_string': json_string
     }
     return render(request, 'draw/index_test2.html', context)
+
+@login_required	
+def upload_file(request):
+	if request.method == 'POST':
+		form = UploadFileForm(request.POST, request.FILES)
+		if form.is_valid():
+			#Получаем логин пользователя
+			username = request.user.username
+			#Получаем файл. Возвращает объект UploadedFile. См. описание тут: https://docs.djangoproject.com/en/1.9/ref/files/uploads/
+			#У него есть нужный метод multiple_chunks\chunks для считывание целым куском, либо по кускам.
+			file = request.FILES['file']
+			#тут создаём парсер и веселимся. Я потом раскидаю в более логичном порядке.
+			return HttpResponseRedirect('/draw/')
+	else:
+		form = UploadFileForm()
+	return render(request, 'draw/index_upload.html', {'form': form})

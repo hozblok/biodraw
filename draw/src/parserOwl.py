@@ -1,7 +1,8 @@
-from django.core.exceptions import ObjectDoesNotExist
 import xml.parsers.expat
+
+from django.core.exceptions import ObjectDoesNotExist
 from ..models import PhysicalEntity
-from .basicFunctions import BUF_SIZE
+from .utils import BUFF_SIZE
 
 PREFIX_CLASSES = "bp"
 
@@ -12,7 +13,7 @@ class parserOwl:
         self.flag_getting_element = False # this flag indicates: class collects data to save the element to BD
         self.current_field_name = ""
         self.list_of_types_of_PhysicalEntity = list(map(lambda x: ":".join((PREFIX_CLASSES, x[0])),
-                                        PhysicalEntity.TYPES_OF_PHYSICALENTITY))
+													PhysicalEntity.TYPES_OF_PHYSICALENTITY))
     
     # first handler functions for parser - This is the opening tag
     def start_element(self, name, attrs):
@@ -68,10 +69,10 @@ class parserOwl:
         parser.CharacterDataHandler = self.char_data
     
         with open(self.path_file, 'rb') as f:
-            xml_chunk = f.read(BUF_SIZE) # lets read stuff in 64kb chunks!
+            xml_chunk = f.read(BUFF_SIZE) # lets read stuff in 64kb chunks!
             while xml_chunk != b"":
                 parser.Parse(xml_chunk)
-                xml_chunk = f.read(BUF_SIZE) # lets read stuff in 64kb chunks!
+                xml_chunk = f.read(BUFF_SIZE) # lets read stuff in 64kb chunks!
 
 
 
@@ -97,9 +98,9 @@ if (__name__ == '__main__'):
     parser.CharacterDataHandler = char_data
 
     file_owl = open(file_name, 'rb')
-    xml_chunk = file_owl.read(BUF_SIZE)
+    xml_chunk = file_owl.read(BUFF_SIZE)
     while xml_chunk != b"":
         parser.Parse(xml_chunk)
-        xml_chunk = file_owl.read(BUF_SIZE)
+        xml_chunk = file_owl.read(BUFF_SIZE)
     file_owl.close()
 
