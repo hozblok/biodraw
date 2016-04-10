@@ -105,16 +105,17 @@ def test2(request):
 
 @login_required	
 def upload_file(request):
-	if request.method == 'POST':
-		form = UploadFileForm(request.POST, request.FILES)
-		if form.is_valid():
-			#Получаем логин пользователя
-			username = request.user.username
-			#Получаем файл. Возвращает объект UploadedFile. См. описание тут: https://docs.djangoproject.com/en/1.9/ref/files/uploads/
-			#У него есть нужный метод multiple_chunks\chunks для считывание целым куском, либо по кускам.
-			file = request.FILES['file']
-			#тут создаём парсер и веселимся. Я потом раскидаю в более логичном порядке.
-			return HttpResponseRedirect('/draw/')
-	else:
-		form = UploadFileForm()
-	return render(request, 'draw/index_upload.html', {'form': form})
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            #Получаем логин пользователя
+            username = request.user.username
+            #Получаем файл. Возвращает объект UploadedFile. См. описание тут: https://docs.djangoproject.com/en/1.9/ref/files/uploads/
+            #У него есть нужный метод multiple_chunks\chunks для считывание целым куском, либо по кускам.
+            file = request.FILES['file']
+            #тут создаём парсер и веселимся. Я потом раскидаю в более логичном порядке.
+            return HttpResponseRedirect('/draw/')
+    else:
+        form = UploadFileForm()
+    return render(request, 'draw/index_upload.html', {'form': form})
+    

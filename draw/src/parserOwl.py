@@ -13,7 +13,7 @@ class parserOwl:
         self.flag_getting_element = False # this flag indicates: class collects data to save the element to BD
         self.current_field_name = ""
         self.list_of_types_of_PhysicalEntity = list(map(lambda x: ":".join((PREFIX_CLASSES, x[0])),
-													PhysicalEntity.TYPES_OF_PHYSICALENTITY))
+                                                    PhysicalEntity.TYPES_OF_PHYSICALENTITY))
     
     # first handler functions for parser - This is the opening tag
     def start_element(self, name, attrs):
