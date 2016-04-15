@@ -9,13 +9,15 @@ Information about the uploaded file in the next format:
 http://www.biopax.org/release/biopax-level3.owl
 """
 class FileOwl(models.Model):
-    original_name = models.CharField(max_length=200)
-    path_name = models.CharField(max_length=210)
+    old_name = models.CharField(max_length=200)
+    new_name = models.CharField(max_length=241)     # sha1 = 40 + "_" = 1 + old_name = 200
+    path_name = models.TextField()                  # path/new_name
     sha1 = models.CharField(unique=True, max_length=40)
     pub_date = models.DateTimeField()
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, verbose_name="Owner")
+    public = models.BooleanField(default=False)
     def __str__(self):
-        return self.path_name
+        return ("   ".join([self.path_name, self.owner.username, repr(self.pub_date)]))
 
 """
 Definition: A pool of molecules or molecular complexes. 

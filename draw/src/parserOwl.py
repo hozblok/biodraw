@@ -7,9 +7,9 @@ from .utils import BUFF_SIZE
 PREFIX_CLASSES = "bp"
 
 class parserOwl:
-    def __init__(self, el_file_owl, path_file):
+    def __init__(self, el_file_owl):
         self.el_file_owl = el_file_owl # element of model fileOwl
-        self.path_file = path_file # path to file
+        self.path_file = el_file_owl.path_name # path to file
         self.flag_getting_element = False # this flag indicates: class collects data to save the element to BD
         self.current_field_name = ""
         self.list_of_types_of_PhysicalEntity = list(map(lambda x: ":".join((PREFIX_CLASSES, x[0])),
@@ -76,7 +76,11 @@ class parserOwl:
 
 
 
-""" TEST """
+"""
+TEST 
+TEST
+TEST
+"""
 if (__name__ == '__main__'):
     file_name = "../data/RAF-Cascade.owl"
 

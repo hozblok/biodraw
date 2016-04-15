@@ -7,6 +7,11 @@ def _hashing(file_name, hash_object, buff_size=BUFF_SIZE):
                 for chunk in iter(lambda: file.read(buff_size), b""):
                         hash_object.update(chunk)
         return hash_object.hexdigest()
+        
+def _hashing_django_uploaded_file(f, hash_object, buff_size=BUFF_SIZE):
+        for chunk in f.chunks(BUFF_SIZE):
+            hash_object.update(chunk)
+        return hash_object.hexdigest()
 
 """
 sha1 hash of file    
@@ -19,6 +24,18 @@ md5 hash of file
 """	
 def md5(fname):
     return _hashing(fname, hashlib.md5())
+    
+"""
+sha1 hash of object of class UploadedFile
+"""	
+def sha1_uploaded_file(object_file):
+    return _hashing_django_uploaded_file(object_file, hashlib.sha1())
+
+"""
+md5 hash of object of class UploadedFile
+"""	
+def md5_uploaded_file(object_file):
+    return _hashing_django_uploaded_file(object_file, hashlib.md5())
 
 
 import random

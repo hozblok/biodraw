@@ -1,50 +1,25 @@
-#from django.http import HttpResponse
-#from django.template import RequestContext, loader
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 import json
-import datetime
 
 from .models import FileOwl
 from .models import PhysicalEntity
 
 from .src.parserOwl import parserOwl
 
-from .src.utils import md5
-from .src.utils import sha1
-from .src.utils import BUFF_SIZE
-from .src.utils import random_id
-
 from .forms import UploadFileForm
+
+from .src.uploadedFileHandler import handle_uploaded_file
 
 #_______________________________________________________________________________#
 #Перенести логику целиком в .src.parserOwl. Вызов происходит теперь в uploadFile|
 #_______________________________________________________________________________#
 def test1(request):
-    suffix_file_name = "RAF-Cascade.owl"
-    file_name = "draw/data/" + suffix_file_name
-    
-    file_sha1 = sha1(file_name)
-    try:
-        el_file_owl = FileOwl.objects.get(sha1=file_sha1)
-    except ObjectDoesNotExist:
-        prefix_for_file_name = random_id()
-        file_name_physical = "draw/data/" + prefix_for_file_name + suffix_file_name
-        el_file_owl = FileOwl(original_name=suffix_file_name, path_name=file_name_physical, sha1=file_sha1, pub_date=datetime.datetime.now())
-        el_file_owl.save()
-    # http://djbook.ru/rel1.7/topics/http/file-uploads.html
-    #?? не окончено, нужно сделать кнопку и допилить механизм, который будет забирать файлы от клиента
-    
-    
-    # parse owl-xml data and collect to database
-    parser = parserOwl(el_file_owl, file_name)
-    parser.parse_owl()
-    
-    
-    
-    
+
+    #+затычка
+    el_file_owl = FileOwl.objects.get(sha1="648df295bd548740d80e0b5aa9166d4859cc6fad")
+    #-
     
     def name_for_js(kind_of, name): 
         return (".".join(["flare", kind_of, "cluster", name]))
@@ -103,19 +78,25 @@ def test2(request):
     }
     return render(request, 'draw/index_test2.html', context)
 
+
 @login_required	
 def upload_file(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            #Получаем логин пользователя
-            username = request.user.username
-            #Получаем файл. Возвращает объект UploadedFile. См. описание тут: https://docs.djangoproject.com/en/1.9/ref/files/uploads/
-            #У него есть нужный метод multiple_chunks\chunks для считывание целым куском, либо по кускам.
-            file = request.FILES['file']
-            #тут создаём парсер и веселимся. Я потом раскидаю в более логичном порядке.
-            return HttpResponseRedirect('/draw/')
+            
+            user = request.user
+            # get file. (class UploadedFile). description: https://docs.djangoproject.com/en/1.9/ref/files/uploads/
+            uploaded_file = request.FILES['file']
+            # save file to media/.../ and save information about file to db
+            db_file_owl = handle_uploaded_file(uploaded_file, user)
+            print("### db_file_owl: ###", db_file_owl)
+            
+            # parse owl-xml data and collect to database
+            parser = parserOwl(db_file_owl)
+            parser.parse_owl()
+            
+            return HttpResponseRedirect('/draw')
     else:
         form = UploadFileForm()
     return render(request, 'draw/index_upload.html', {'form': form})
-    
